@@ -1,1 +1,3 @@
 # Dimensionality-Reduction-using-Breast-Cancer-Wisconsin-Diagnostic-DataSet
+Our goal is to train a machine learning model that is able to classify a random breast cancer cell observation as either benign or malignant. This can be seen as a binary classification problem in machine learning.
+I have chosen the random forest classifier for this particular problem but feel free to try out other classification models of your choice. In terms of comparing the effectiveness of each feature selection technique, I have used the confusion matrix to assess model accuracy while taking into account the number of features that are needed to achieve that accuracy.
