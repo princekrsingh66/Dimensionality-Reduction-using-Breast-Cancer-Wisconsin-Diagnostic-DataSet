@@ -143,3 +143,158 @@ vif_table
 
 features_to_drop = list(vif_table['Feature'])[:5]
 features_to_drop
+            
+# Drop top 5 features with highest VIF
+
+new_features = original_features.drop(features_to_drop, axis = 1)
+# Train test split
+X_train, X_test, Y_train, Y_test = train_test_split(new_features, target, test_size = 0.3, random_state = 10)
+
+# Fit model to data and make predictions
+rf = RandomForestClassifier(random_state = 42)
+rf.fit(X_train, Y_train)
+Y_pred = rf.predict(X_test)
+
+# Evaluate model accuracy 
+accuracy = accuracy_score(Y_pred, Y_test) * 100
+print("Accuracy: {:.2f}%".format(accuracy))
+f1 = f1_score(Y_pred, Y_test)
+print("F1 score: {:.2f}".format(f1))
+cm = confusion_matrix(Y_pred, Y_test)
+sns.heatmap(cm, annot = True, fmt = 'd')
+            
+#Univariate feature selection
+# Train test split
+
+X_train, X_test, Y_train, Y_test = train_test_split(original_features, target, test_size = 0.3, random_state = 10)
+# Instantiate select features
+select_features = SelectKBest(chi2, k = 5).fit(X_train, Y_train)
+
+# Top 5 features
+selected_features = select_features.get_support()
+print("Top 5 features: ", list(X_train.columns[selected_features]))
+            
+# Apply select features to training and test set
+X_train = select_features.transform(X_train)
+X_test = select_features.transform(X_test)
+
+# Fit model to data and make predictions
+rf = RandomForestClassifier(random_state = 42)
+rf.fit(X_train, Y_train)
+Y_pred = rf.predict(X_test)
+
+# Evaluate model accuracy 
+accuracy = accuracy_score(Y_pred, Y_test) * 100
+print("Accuracy: {:.2f}%".format(accuracy))
+f1 = f1_score(Y_pred, Y_test)
+print("F1 score: {:.2f}".format(f1))
+cm = confusion_matrix(Y_pred, Y_test)
+sns.heatmap(cm, annot = True, fmt = 'd')
+
+#Recursive feature elimination
+# Train test split
+
+X_train, X_test, Y_train, Y_test = train_test_split(original_features, target, test_size = 0.3, random_state = 10)
+# Instantiate recursive feature elimination to select the top 5 features
+rf = RandomForestClassifier(random_state = 42)
+rfe = RFE(estimator = rf, n_features_to_select = 5).fit(X_train, Y_train)
+
+# Top 5 features
+print("Top 5 features: ", list(X_train.columns[rfe.support_]))
+
+# Make predictions on test set
+Y_pred = rfe.predict(X_test)
+
+# Evaluate model accuracy 
+accuracy = accuracy_score(Y_pred, Y_test) * 100
+print("Accuracy: {:.2f}%".format(accuracy))
+f1 = f1_score(Y_pred, Y_test)
+print("F1 score: {:.2f}".format(f1))
+cm = confusion_matrix(Y_pred, Y_test)
+sns.heatmap(cm, annot = True, fmt = 'd')
+            
+#Model-based feature selection
+# Train test split
+
+X_train, X_test, Y_train, Y_test = train_test_split(original_features, target, test_size = 0.3, random_state = 10)
+# Fit model to data
+
+rf = RandomForestClassifier(random_state = 42)
+rf.fit(X_train, Y_train)
+importances = rf.feature_importances_
+std = np.std([tree.feature_importances_ for tree in rf.estimators_], axis = 0)
+indices = np.argsort(importances)[::-1]
+# Evaluate feature importances
+
+print("Feature ranking: ")
+for f in range(X_train.shape[1]):
+    print("%d. feature %d (%f)" %(f + 1, indices[f], importances[indices[f]]))
+            
+# Plot feature importances
+
+plt.figure(figsize = (15, 8))
+plt.title("Feature importances")
+plt.bar(range(X_train.shape[1]), importances[indices],
+        color = "r", yerr = std[indices], align="center")
+plt.xticks(range(X_train.shape[1]), X_train.columns[indices], rotation = 90)
+plt.xlim([-1, X_train.shape[1]])
+plt.show()
+            
+# Select features with importances above 5%
+
+new_features = original_features.iloc[:, list(indices)[:9]]
+print("Number of features above 5%: ", len(new_features.columns))
+list(new_features.columns) 
+
+# Train test split
+X_train, X_test, Y_train, Y_test = train_test_split(new_features, target, test_size = 0.3, random_state = 10)
+
+# Fit model to data and make predictions
+rf = RandomForestClassifier(random_state = 42)
+rf.fit(X_train, Y_train)
+Y_pred = rf.predict(X_test)
+
+# Evaluate model accuracy 
+accuracy = accuracy_score(Y_pred, Y_test) * 100
+print("Accuracy: {:.2f}%".format(accuracy))
+f1 = f1_score(Y_pred, Y_test)
+print("F1 score: {:.2f}".format(f1))
+cm = confusion_matrix(Y_pred, Y_test)
+sns.heatmap(cm, annot = True, fmt = 'd')
+           
+#Principal component analysis (PCA)
+# Train test split using standardised features
+
+X_train, X_test, Y_train, Y_test = train_test_split(standard_features, target, test_size = 0.3, random_state = 10)
+# Instantiate and fit PCA to training set
+
+pca = PCA()
+pca.fit(X_train)
+# Visualise explained variance ratio to the number of components
+
+plt.figure(figsize = (10, 6))
+plt.clf()
+plt.axes([.2, .2, .7, .7])
+plt.plot(pca.explained_variance_ratio_, linewidth = 2)
+plt.axis('tight')
+plt.xlabel('Number of components')
+plt.ylabel('Explained variance ratio')
+            
+# Instantiate PCA with 4 components and transform both training set and test set
+
+pca = PCA(n_components = 4)
+pca.fit(X_train)
+X_train = pca.transform(X_train)
+X_test = pca.transform(X_test)
+# Fit model to data and make predictions
+rf = RandomForestClassifier(random_state = 42)
+rf.fit(X_train, Y_train)
+Y_pred = rf.predict(X_test)
+
+# Evaluate model accuracy 
+accuracy = accuracy_score(Y_pred, Y_test) * 100
+print("Accuracy: {:.2f}%".format(accuracy))
+f1 = f1_score(Y_pred, Y_test)
+print("F1 score: {:.2f}".format(f1))
+cm = confusion_matrix(Y_pred, Y_test)
+sns.heatmap(cm, annot = True, fmt = 'd')
