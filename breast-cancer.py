@@ -19,7 +19,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 #Import and read data
-data = pd.read_csv("C:/Users/Jason Chong/Documents/Kaggle/breast-cancer/data.csv")
+data = pd.read_csv("C:/Breast_cancer_comp/data.csv")
 data.head()
 print("Shape of dataframe: ", data.shape)
 
