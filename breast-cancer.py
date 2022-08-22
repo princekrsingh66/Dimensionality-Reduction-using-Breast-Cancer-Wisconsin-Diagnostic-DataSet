@@ -76,7 +76,7 @@ plt.show()
 correlation = feature_mean.corr()
 plt.figure(figsize = (10, 8))
 plt.title('Correlation Between Predictor Variables')
-sns.heatmap(correlation, annot = True, fmt = '.2f', cmap = 'coolwarm
+sns.heatmap(correlation, annot = True, fmt = '.2f', cmap = 'coolwarm')
             
 # Pairplot between correlated features
 
